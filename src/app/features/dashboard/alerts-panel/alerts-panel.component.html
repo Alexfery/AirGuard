@@ -1,0 +1,48 @@
+<mat-card class="alerts-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>notifications_active</mat-icon>
+      Alerte recente
+    </mat-card-title>
+    @if (alerts.length > 0) {
+      <mat-chip class="alert-count-chip">{{ alerts.length }}</mat-chip>
+    }
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (isLoading) {
+      <div class="skeleton-list">
+        @for (_ of [1, 2, 3]; track $index) {
+          <div class="skeleton-item">
+            <div class="skeleton skeleton-dot"></div>
+            <div class="skeleton-text">
+              <div class="skeleton skeleton-line long"></div>
+              <div class="skeleton skeleton-line short"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (alerts.length === 0) {
+      <div class="empty-state">
+        <mat-icon>check_circle_outline</mat-icon>
+        <p>Nicio alertă activă</p>
+        <span>Toți parametrii sunt în limite normale</span>
+      </div>
+    } @else {
+      <mat-list class="alerts-list">
+        @for (alert of alerts; track alert.id) {
+          <mat-list-item class="alert-item" [class]="'severity-' + alert.severity">
+            <div matListItemIcon class="alert-icon-wrapper" [class]="'icon-' + alert.severity">
+              <mat-icon>{{ alert.severity === 'danger' ? 'dangerous' : 'warning' }}</mat-icon>
+            </div>
+            <div matListItemTitle class="alert-message">{{ alert.message }}</div>
+            <div matListItemLine class="alert-meta">
+              <span class="alert-device">{{ alert.deviceName }}</span>
+              <span class="alert-time">{{ relativeTime(alert.timestamp) }}</span>
+            </div>
+          </mat-list-item>
+        }
+      </mat-list>
+    }
+  </mat-card-content>
+</mat-card>

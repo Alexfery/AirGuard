@@ -1,0 +1,98 @@
+.navbar {
+  background: var(--bg-sidebar) !important;
+  border-bottom: 1px solid var(--border);
+  height: 56px;
+  min-height: 56px;
+  padding: 0 8px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  .menu-btn {
+    color: var(--text-secondary);
+    margin-right: 4px;
+  }
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+
+    .brand-icon {
+      color: var(--accent);
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .navbar-status {
+    margin-right: 8px;
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(76, 175, 80, 0.1);
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      border-radius: 12px;
+      padding: 4px 10px;
+
+      .live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent-green);
+        animation: pulse 2s infinite;
+      }
+
+      .live-text {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent-green);
+        letter-spacing: 1px;
+      }
+    }
+  }
+
+  .avatar-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #0097a7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: white;
+  }
+}
+
+.menu-user-info {
+  padding: 12px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+
+  span {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+}

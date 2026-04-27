@@ -1,0 +1,148 @@
+<div class="page-container fade-in">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>history</mat-icon>
+      Istoric date
+    </h1>
+    <button mat-raised-button color="accent" (click)="exportCsv()" [disabled]="historyData().length === 0" matTooltip="Exportă datele vizibile ca CSV">
+      <mat-icon>download</mat-icon>
+      Export CSV
+    </button>
+  </div>
+
+  <!-- Filters Card -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Dispozitiv</mat-label>
+          <mat-icon matPrefix>device_hub</mat-icon>
+          <mat-select formControlName="deviceId">
+            @for (d of deviceOptions; track d.id) {
+              <mat-option [value]="d.id">{{ d.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Data de start</mat-label>
+          <mat-icon matPrefix>calendar_today</mat-icon>
+          <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+          <mat-datepicker-toggle matIconSuffix [for]="startPicker" />
+          <mat-datepicker #startPicker />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Data de sfârșit</mat-label>
+          <mat-icon matPrefix>event</mat-icon>
+          <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+          <mat-datepicker-toggle matIconSuffix [for]="endPicker" />
+          <mat-datepicker #endPicker />
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="isLoading()">
+          <mat-icon>search</mat-icon>
+          Caută
+        </button>
+      </form>
+
+      <div class="metric-toggles">
+        <span class="toggles-label">Metrici afișate:</span>
+        @for (m of metricOptions; track m.key) {
+          <button
+            mat-stroked-button
+            class="metric-toggle"
+            [class.active]="isMetricActive(m.key)"
+            [style.--mc]="m.color"
+            (click)="toggleMetric(m.key)">
+            <span class="mdot" [style.background]="m.color"></span>
+            {{ m.label }}
+          </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Chart -->
+  <mat-card class="chart-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>timeline</mat-icon>
+        Grafic date istorice
+        @if (historyData().length > 0) {
+          <span class="data-count">{{ historyData().length }} înregistrări</span>
+        }
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (isLoading()) {
+        <div class="chart-loading">
+          <mat-spinner diameter="36" />
+          <span>Se încarcă datele...</span>
+        </div>
+      } @else if (historyData().length === 0) {
+        <div class="chart-empty">
+          <mat-icon>bar_chart_off</mat-icon>
+          <p>Nicio dată disponibilă pentru perioada selectată</p>
+        </div>
+      } @else {
+        <div class="chart-wrapper">
+          <canvas #historyCanvas></canvas>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Data Table -->
+  @if (historyData().length > 0) {
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>table_chart</mat-icon>
+          Date brute
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="pagedData()" class="history-table">
+            <ng-container matColumnDef="timestamp">
+              <th mat-header-cell *matHeaderCellDef>Timestamp</th>
+              <td mat-cell *matCellDef="let r">{{ r.timestamp | date:'dd/MM/yy HH:mm' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="co2">
+              <th mat-header-cell *matHeaderCellDef>CO₂ (ppm)</th>
+              <td mat-cell *matCellDef="let r" [class]="'val-' + getCo2Class(r.co2)">{{ r.co2 }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="pm25">
+              <th mat-header-cell *matHeaderCellDef>PM2.5 (μg/m³)</th>
+              <td mat-cell *matCellDef="let r" [class]="'val-' + getPm25Class(r.pm25)">{{ r.pm25 }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="temperature">
+              <th mat-header-cell *matHeaderCellDef>Temp (°C)</th>
+              <td mat-cell *matCellDef="let r">{{ r.temperature }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="humidity">
+              <th mat-header-cell *matHeaderCellDef>Umiditate (%)</th>
+              <td mat-cell *matCellDef="let r">{{ r.humidity }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+          </table>
+        </div>
+
+        <mat-paginator
+          [length]="historyData().length"
+          [pageSize]="15"
+          [pageSizeOptions]="[10, 15, 25, 50]"
+          showFirstLastButtons
+          class="table-paginator">
+        </mat-paginator>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

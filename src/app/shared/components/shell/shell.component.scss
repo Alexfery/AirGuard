@@ -1,0 +1,150 @@
+.shell-container {
+  height: 100vh;
+  background: var(--bg-primary);
+}
+
+.shell-sidenav {
+  width: 240px;
+  background: var(--bg-sidebar) !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+.sidenav-header {
+  padding: 24px 20px 16px;
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+
+    .logo-icon {
+      color: var(--accent);
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .logo-tagline {
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding-left: 38px;
+  }
+}
+
+.nav-list {
+  padding: 8px 0;
+
+  a[mat-list-item] {
+    border-radius: 8px;
+    margin: 2px 8px;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(38, 198, 218, 0.08) !important;
+      color: var(--text-primary);
+    }
+
+    mat-icon {
+      color: inherit;
+    }
+  }
+
+  .nav-active {
+    background: rgba(38, 198, 218, 0.15) !important;
+    color: var(--accent) !important;
+
+    mat-icon {
+      color: var(--accent) !important;
+    }
+  }
+}
+
+.sidenav-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: 8px;
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 8px;
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #0097a7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .user-details {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .user-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-email {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .logout-btn {
+    width: 100%;
+    color: var(--text-secondary);
+    justify-content: flex-start;
+    padding: 4px 16px;
+    gap: 8px;
+    border-radius: 0;
+
+    &:hover {
+      background: rgba(244, 67, 54, 0.1);
+      color: var(--accent-red);
+    }
+
+    mat-icon { font-size: 20px; }
+    span { font-size: 13px; }
+  }
+}
+
+.shell-content {
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  overflow: auto;
+}

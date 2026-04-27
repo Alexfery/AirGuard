@@ -1,0 +1,118 @@
+<div class="page-container fade-in">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>dashboard</mat-icon>
+      Dashboard
+    </h1>
+    <div class="header-meta">
+      <span class="last-update">
+        <mat-icon>schedule</mat-icon>
+        Actualizare automată la 3s
+      </span>
+    </div>
+  </div>
+
+  <!-- Metric Cards -->
+  <section class="metrics-grid">
+    @for (card of metricCards; track card.key) {
+      <app-air-quality-card
+        [title]="card.title"
+        [icon]="card.icon"
+        [unit]="card.unit"
+        [value]="getLatestValue(card.key)"
+        [previousValue]="getPreviousValue(card.key)"
+        [thresholds]="card.thresholds"
+        [isLoading]="isLoadingMetrics()" />
+    }
+  </section>
+
+  <!-- Chart + Alerts Row -->
+  <section class="chart-alerts-row">
+    <div class="chart-col">
+      <app-live-chart />
+    </div>
+    <div class="alerts-col">
+      <app-alerts-panel [alerts]="alerts()" [isLoading]="isLoadingDevices()" />
+    </div>
+  </section>
+
+  <!-- Devices Overview -->
+  <section class="devices-section">
+    <h2 class="section-title">
+      <mat-icon>device_hub</mat-icon>
+      Dispozitive
+      <a mat-button color="primary" routerLink="/devices" class="see-all-btn">
+        Vezi toate
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </h2>
+
+    <div class="devices-grid">
+      @if (isLoadingDevices()) {
+        @for (_ of [1, 2, 3]; track $index) {
+          <mat-card class="device-card loading">
+            <div class="skeleton skeleton-device-title"></div>
+            <div class="skeleton skeleton-device-row"></div>
+            <div class="skeleton skeleton-device-row short"></div>
+          </mat-card>
+        }
+      } @else {
+        @for (device of devices(); track device.id) {
+          <mat-card class="device-card fade-in">
+            <div class="device-card-header">
+              <div class="device-title-block">
+                <span class="device-name">{{ device.name }}</span>
+                <span class="device-location">
+                  <mat-icon>place</mat-icon>
+                  {{ device.location }}
+                </span>
+              </div>
+              <div class="device-status-dot" [class]="device.status === 'online' ? 'dot-online' : 'dot-offline'" [matTooltip]="device.status === 'online' ? 'Online' : 'Offline'"></div>
+            </div>
+
+            <mat-divider />
+
+            <div class="device-sensors">
+              @if (latestReadings()[device.id]; as r) {
+                <div class="sensor-row">
+                  <span><mat-icon>air</mat-icon> CO₂</span>
+                  <strong [class]="r.co2 > 1200 ? 'status-danger' : r.co2 > 800 ? 'status-warning' : 'status-ok'">{{ r.co2 }} ppm</strong>
+                </div>
+                <div class="sensor-row">
+                  <span><mat-icon>grain</mat-icon> PM2.5</span>
+                  <strong [class]="r.pm25 > 35 ? 'status-danger' : r.pm25 > 12 ? 'status-warning' : 'status-ok'">{{ r.pm25 }} μg/m³</strong>
+                </div>
+                <div class="sensor-row">
+                  <span><mat-icon>thermostat</mat-icon> Temp</span>
+                  <strong>{{ r.temperature }}°C</strong>
+                </div>
+              } @else {
+                <div class="no-data">
+                  <mat-icon>signal_disconnected</mat-icon>
+                  <span>{{ device.status === 'offline' ? 'Dispozitiv offline' : 'Aștept date...' }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="device-footer">
+              <div class="window-control">
+                <mat-icon class="window-icon">sensor_window</mat-icon>
+                <span>Fereastră</span>
+                <mat-slide-toggle
+                  color="primary"
+                  [checked]="device.windowOpen"
+                  [disabled]="device.status === 'offline'"
+                  (change)="toggleWindow(device)"
+                  [matTooltip]="device.windowOpen ? 'Fereastră deschisă — apasă pentru a închide' : 'Fereastră închisă — apasă pentru a deschide'">
+                </mat-slide-toggle>
+              </div>
+              <a mat-icon-button [routerLink]="['/devices', device.id]" matTooltip="Detalii dispozitiv">
+                <mat-icon>open_in_new</mat-icon>
+              </a>
+            </div>
+          </mat-card>
+        }
+      }
+    </div>
+  </section>
+</div>

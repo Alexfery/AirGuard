@@ -1,0 +1,36 @@
+<mat-card class="metric-card" [class]="'status-' + status">
+  @if (isLoading) {
+    <div class="skeleton-content">
+      <div class="skeleton skeleton-icon"></div>
+      <div class="skeleton skeleton-value"></div>
+      <div class="skeleton skeleton-label"></div>
+    </div>
+  } @else {
+    <div class="card-header">
+      <div class="icon-wrapper" [class]="'status-' + status">
+        <mat-icon>{{ icon }}</mat-icon>
+      </div>
+      <div class="status-badge" [class]="'badge-' + status" [matTooltip]="statusLabel">
+        <mat-icon class="status-icon">{{ statusIcon }}</mat-icon>
+        <span>{{ statusLabel }}</span>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="value-row">
+        <span class="value">{{ formattedValue }}</span>
+        <span class="unit">{{ unit }}</span>
+        @if (trend !== 'stable') {
+          <mat-icon class="trend-icon" [class]="trend === 'up' ? 'trend-up' : 'trend-down'" [matTooltip]="trend === 'up' ? 'În creștere' : 'În scădere'">
+            {{ trendIcon }}
+          </mat-icon>
+        }
+      </div>
+      <p class="metric-title">{{ title }}</p>
+    </div>
+
+    <div class="card-footer">
+      <div class="status-bar" [class]="'bar-' + status"></div>
+    </div>
+  }
+</mat-card>

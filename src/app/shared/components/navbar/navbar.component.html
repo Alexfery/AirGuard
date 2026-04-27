@@ -1,0 +1,43 @@
+<mat-toolbar class="navbar">
+  <button mat-icon-button class="menu-btn" (click)="toggleSidenav.emit()" matTooltip="Toggle meniu">
+    <mat-icon>{{ sidenavOpen ? 'menu_open' : 'menu' }}</mat-icon>
+  </button>
+
+  <div class="navbar-brand">
+    <mat-icon class="brand-icon">air</mat-icon>
+    <span>AirGuard</span>
+  </div>
+
+  <span class="spacer"></span>
+
+  <div class="navbar-status">
+    <div class="live-indicator">
+      <span class="live-dot"></span>
+      <span class="live-text">LIVE</span>
+    </div>
+  </div>
+
+  <button mat-icon-button matTooltip="Notificări" routerLink="/history">
+    <mat-icon [matBadge]="'3'" matBadgeColor="warn" matBadgeSize="small">notifications_outlined</mat-icon>
+  </button>
+
+  <button mat-icon-button [matMenuTriggerFor]="userMenu" matTooltip="Cont utilizator">
+    <div class="avatar-btn">
+      {{ auth.currentUser()?.name?.charAt(0)?.toUpperCase() || 'U' }}
+    </div>
+  </button>
+
+  <mat-menu #userMenu="matMenu" class="user-menu">
+    @if (auth.currentUser()) {
+      <div class="menu-user-info">
+        <strong>{{ auth.currentUser()!.name }}</strong>
+        <span>{{ auth.currentUser()!.email }}</span>
+      </div>
+      <mat-divider style="margin: 4px 0" />
+    }
+    <button mat-menu-item (click)="auth.logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Deconectare</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>

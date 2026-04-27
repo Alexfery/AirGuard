@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;c9560b2e1bf762d0903f05ba701a58266eded30b5bc40379b61578594c4c37be;/home/alex/Desktop/IoT/Website_AirGuard/src/app/features/devices/devices-list/add-device-dialog.component.ts"],
+  "sourcesContent": ["\n    h2[mat-dialog-title] {\n      display: flex; align-items: center; gap: 8px;\n      color: var(--text-primary);\n      mat-icon { color: var(--accent); }\n    }\n    .dialog-form { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; }\n    .full-width { width: 100%; }\n  "],
+  "mappings": ";AACI,EAAE,CAAC;AACD,WAAS;AAAM,eAAa;AAAQ,OAAK;AACzC,SAAO,IAAI;AACX;AAAW,WAAO,IAAI;AAAW;AACnC;AACA,CAAC;AAAc,WAAS;AAAM,kBAAgB;AAAQ,OAAK;AAAK,eAAa;AAAK;AAClF,CAAC;AAAa,SAAO;AAAM;",
+  "names": []
+}

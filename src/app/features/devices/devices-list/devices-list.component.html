@@ -1,0 +1,163 @@
+<div class="page-container fade-in">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>device_hub</mat-icon>
+      Dispozitive
+    </h1>
+    <button mat-raised-button color="primary" (click)="openAddDialog()">
+      <mat-icon>add</mat-icon>
+      Adaugă dispozitiv
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40" />
+      <p>Se încarcă dispozitivele...</p>
+    </div>
+  } @else if (devices().length === 0) {
+    <mat-card class="empty-card">
+      <mat-icon>device_unknown</mat-icon>
+      <h3>Niciun dispozitiv găsit</h3>
+      <p>Adaugă primul tău senzor AirGuard</p>
+      <button mat-raised-button color="primary" (click)="openAddDialog()">
+        <mat-icon>add</mat-icon> Adaugă dispozitiv
+      </button>
+    </mat-card>
+  } @else {
+    <!-- Mobile cards -->
+    <div class="devices-mobile">
+      @for (device of devices(); track device.id) {
+        <mat-card class="device-mobile-card fade-in">
+          <div class="device-header">
+            <div>
+              <p class="device-name">{{ device.name }}</p>
+              <p class="device-location"><mat-icon>place</mat-icon> {{ device.location }}</p>
+            </div>
+            <div class="device-status-badge" [class]="device.status === 'online' ? 'chip-online' : 'chip-offline'">
+              {{ device.status === 'online' ? 'Online' : 'Offline' }}
+            </div>
+          </div>
+
+          <div class="device-metrics">
+            @if (device.co2) {
+              <div class="metric-chip">
+                <span class="metric-label">CO₂</span>
+                <span [class]="getCo2Class(device.co2)">{{ device.co2 }} ppm</span>
+              </div>
+              <div class="metric-chip">
+                <span class="metric-label">PM2.5</span>
+                <span [class]="getPm25Class(device.pm25)">{{ device.pm25 }} μg/m³</span>
+              </div>
+              <div class="metric-chip">
+                <span class="metric-label">Temp</span>
+                <span>{{ device.temperature }}°C</span>
+              </div>
+              <div class="metric-chip">
+                <span class="metric-label">Umid</span>
+                <span>{{ device.humidity }}%</span>
+              </div>
+            }
+          </div>
+
+          <div class="device-actions">
+            <div class="window-toggle">
+              <mat-icon>sensor_window</mat-icon>
+              <span>Fereastră</span>
+              <mat-slide-toggle
+                color="primary"
+                [checked]="device.windowOpen"
+                [disabled]="device.status === 'offline'"
+                (change)="toggleWindow(device)">
+              </mat-slide-toggle>
+            </div>
+            <a mat-stroked-button [routerLink]="['/devices', device.id]">
+              <mat-icon>open_in_new</mat-icon>
+              Detalii
+            </a>
+          </div>
+        </mat-card>
+      }
+    </div>
+
+    <!-- Desktop table -->
+    <mat-card class="table-card devices-desktop">
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="devices()" class="devices-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Nume</th>
+            <td mat-cell *matCellDef="let d">
+              <div class="name-cell">
+                <mat-icon class="device-icon">sensors</mat-icon>
+                <strong>{{ d.name }}</strong>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="location">
+            <th mat-header-cell *matHeaderCellDef>Locație</th>
+            <td mat-cell *matCellDef="let d">{{ d.location }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let d">
+              <mat-chip class="status-chip" [class]="d.status === 'online' ? 'chip-online' : 'chip-offline'">
+                {{ d.status === 'online' ? 'Online' : 'Offline' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="co2">
+            <th mat-header-cell *matHeaderCellDef>CO₂</th>
+            <td mat-cell *matCellDef="let d" [class]="getCo2Class(d.co2)">
+              {{ d.co2 ?? '—' }} {{ d.co2 ? 'ppm' : '' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="pm25">
+            <th mat-header-cell *matHeaderCellDef>PM2.5</th>
+            <td mat-cell *matCellDef="let d" [class]="getPm25Class(d.pm25)">
+              {{ d.pm25 ?? '—' }} {{ d.pm25 ? 'μg/m³' : '' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="temperature">
+            <th mat-header-cell *matHeaderCellDef>Temp</th>
+            <td mat-cell *matCellDef="let d">{{ d.temperature ?? '—' }}{{ d.temperature ? '°C' : '' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="humidity">
+            <th mat-header-cell *matHeaderCellDef>Umid</th>
+            <td mat-cell *matCellDef="let d">{{ d.humidity ?? '—' }}{{ d.humidity ? '%' : '' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="window">
+            <th mat-header-cell *matHeaderCellDef>Fereastră</th>
+            <td mat-cell *matCellDef="let d">
+              <mat-slide-toggle
+                color="primary"
+                [checked]="d.windowOpen"
+                [disabled]="d.status === 'offline'"
+                (change)="toggleWindow(d)"
+                [matTooltip]="d.windowOpen ? 'Deschisă' : 'Închisă'">
+              </mat-slide-toggle>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acțiuni</th>
+            <td mat-cell *matCellDef="let d">
+              <a mat-icon-button [routerLink]="['/devices', d.id]" matTooltip="Detalii">
+                <mat-icon>open_in_new</mat-icon>
+              </a>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+        </table>
+      </div>
+    </mat-card>
+  }
+</div>

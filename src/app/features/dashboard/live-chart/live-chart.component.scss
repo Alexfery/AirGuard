@@ -1,0 +1,62 @@
+.chart-card {
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 20px 8px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin: 0;
+
+      mat-icon { color: var(--accent); font-size: 20px; }
+    }
+  }
+
+  mat-card-content {
+    padding: 8px 20px 20px !important;
+  }
+}
+
+.chart-toggles {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toggle-btn {
+  font-size: 12px;
+  height: 30px;
+  padding: 0 10px;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &.active {
+    border-color: var(--ds-color) !important;
+    color: var(--text-primary) !important;
+    background: rgba(from var(--ds-color) r g b / 0.1) !important;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}
+
+.chart-wrapper {
+  height: 280px;
+  position: relative;
+}

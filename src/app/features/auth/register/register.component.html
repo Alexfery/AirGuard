@@ -1,0 +1,89 @@
+<div class="auth-page">
+  <div class="auth-bg">
+    <div class="particle p1"></div>
+    <div class="particle p2"></div>
+    <div class="particle p3"></div>
+  </div>
+
+  <mat-card class="auth-card fade-in">
+    <div class="auth-logo">
+      <mat-icon class="auth-logo-icon">air</mat-icon>
+      <h1>AirGuard</h1>
+      <p class="tagline">Creează un cont nou</p>
+    </div>
+
+    <mat-card-content>
+      @if (errorMessage()) {
+        <div class="error-banner">
+          <mat-icon>error_outline</mat-icon>
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nume complet</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input matInput formControlName="name" placeholder="Ion Popescu" autocomplete="name">
+          @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+            <mat-error>Numele este obligatoriu</mat-error>
+          }
+          @if (form.get('name')?.hasError('minlength') && form.get('name')?.touched) {
+            <mat-error>Minim 2 caractere</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" formControlName="email" placeholder="exemplu@email.com" autocomplete="email">
+          @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+            <mat-error>Email-ul este obligatoriu</mat-error>
+          }
+          @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+            <mat-error>Introduceți un email valid</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Parolă</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="new-password">
+          <button mat-icon-button matSuffix type="button" (click)="toggleShowPassword()">
+            <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+            <mat-error>Parola este obligatorie</mat-error>
+          }
+          @if (form.get('password')?.hasError('minlength') && form.get('password')?.touched) {
+            <mat-error>Minim 8 caractere</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirmă parola</mat-label>
+          <mat-icon matPrefix>lock_outline</mat-icon>
+          <input matInput [type]="showPassword() ? 'text' : 'password'" formControlName="confirmPassword" autocomplete="new-password">
+          @if (form.hasError('passwordMismatch') && form.get('confirmPassword')?.touched) {
+            <mat-error>Parolele nu se potrivesc</mat-error>
+          }
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" class="submit-btn" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <mat-spinner diameter="20" />
+            <span>Creare cont...</span>
+          } @else {
+            <mat-icon>person_add</mat-icon>
+            <span>Creează cont</span>
+          }
+        </button>
+      </form>
+
+      <p class="auth-link">
+        Ai deja cont?
+        <a routerLink="/login">Intră în cont</a>
+      </p>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,57 @@
+<mat-sidenav-container class="shell-container">
+  <mat-sidenav
+    class="shell-sidenav"
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="sidenavOpen()"
+    (closedStart)="sidenavOpen.set(false)">
+
+    <div class="sidenav-header">
+      <div class="logo">
+        <mat-icon class="logo-icon">air</mat-icon>
+        <span class="logo-text">AirGuard</span>
+      </div>
+      <span class="logo-tagline">Monitorizare calitate aer</span>
+    </div>
+
+    <mat-divider />
+
+    <mat-nav-list class="nav-list">
+      @for (item of navItems; track item.route) {
+        <a mat-list-item
+          [routerLink]="item.route"
+          routerLinkActive="nav-active"
+          [matTooltip]="item.label"
+          matTooltipPosition="right">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+
+    <div class="sidenav-footer">
+      <mat-divider />
+      @if (auth.currentUser()) {
+        <div class="user-info">
+          <div class="user-avatar">
+            {{ auth.currentUser()!.name.charAt(0).toUpperCase() }}
+          </div>
+          <div class="user-details">
+            <span class="user-name">{{ auth.currentUser()!.name }}</span>
+            <span class="user-email">{{ auth.currentUser()!.email }}</span>
+          </div>
+        </div>
+      }
+      <button mat-button class="logout-btn" (click)="auth.logout()" matTooltip="Deconectare">
+        <mat-icon>logout</mat-icon>
+        <span>Deconectare</span>
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="shell-content">
+    <app-navbar [sidenavOpen]="sidenavOpen()" (toggleSidenav)="toggleSidenav()" />
+    <main class="main-content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
