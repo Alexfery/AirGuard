@@ -27,17 +27,13 @@ import { HistoryEntry } from '../../core/services/mock-data.service';
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip, Filler);
 
-const DEVICE_OPTIONS = [
-  { id: 'device-1', name: 'Senzor Living' },
-  { id: 'device-2', name: 'Senzor Dormitor' },
-  { id: 'device-3', name: 'Senzor Birou' },
-];
-
 const METRICS = [
-  { key: 'co2', label: 'CO₂ (ppm)', color: '#26c6da' },
-  { key: 'pm25', label: 'PM2.5 (μg/m³)', color: '#ff9800' },
-  { key: 'temperature', label: 'Temperatură (°C)', color: '#4caf50' },
-  { key: 'humidity', label: 'Umiditate (%)', color: '#ab47bc' },
+  { key: 'co2Ppm', label: 'CO₂ (ppm)', color: '#26c6da' },
+  { key: 'tvocPpb', label: 'TVOC (ppb)', color: '#e040fb' },
+  { key: 'pm25Ugm3', label: 'PM2.5 (μg/m³)', color: '#ff9800' },
+  { key: 'temperatureC', label: 'Temperatură (°C)', color: '#4caf50' },
+  { key: 'humidityPct', label: 'Umiditate (%)', color: '#ab47bc' },
+  { key: 'pressureAtm', label: 'Presiune (atm)', color: '#78909c' },
 ];
 
 @Component({
@@ -56,15 +52,16 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('historyCanvas') historyCanvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  deviceOptions = DEVICE_OPTIONS;
+  deviceOptions = signal<{ value: string; label: string }[]>([]);
+  isLoadingDevices = signal(false);
   metricOptions = METRICS;
-  displayedColumns = ['timestamp', 'co2', 'pm25', 'temperature', 'humidity'];
+  displayedColumns = ['timestamp', 'co2Ppm', 'pm25Ugm3', 'temperatureC', 'humidityPct'];
 
   filterForm = this.fb.group({
-    deviceId: ['device-1'],
+    deviceId: ['' as string],
     startDate: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)],
     endDate: [new Date()],
-    metrics: [['co2', 'pm25', 'temperature']],
+    metrics: [['co2Ppm', 'pm25Ugm3', 'temperatureC']],
   });
 
   isLoading = signal(false);
@@ -80,7 +77,20 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.search();
+    this.isLoadingDevices.set(true);
+    this.apiService.getDevices().subscribe({
+      next: (devices) => {
+        this.deviceOptions.set(devices.map(d => ({ value: d.id, label: d.name })));
+        if (devices.length) {
+          this.filterForm.patchValue({ deviceId: devices[0].id });
+          this.search();
+        }
+        this.isLoadingDevices.set(false);
+      },
+      error: () => {
+        this.isLoadingDevices.set(false);
+      },
+    });
   }
 
   ngAfterViewInit() {
@@ -152,8 +162,8 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
   exportCsv() {
     const data = this.historyData();
     if (!data.length) return;
-    const headers = ['Timestamp', 'Device ID', 'CO2 (ppm)', 'PM2.5 (ug/m3)', 'Temperatura (C)', 'Umiditate (%)'];
-    const rows = data.map(e => [e.timestamp, e.deviceId, e.co2, e.pm25, e.temperature, e.humidity]);
+    const headers = ['Timestamp', 'Device ID', 'CO2 (ppm)', 'TVOC (ppb)', 'PM2.5 (ug/m3)', 'Temperatura (C)', 'Umiditate (%)', 'Presiune (atm)'];
+    const rows = data.map(e => [e.timestamp, e.deviceId, e.co2Ppm, e.tvocPpb, e.pm25Ugm3, e.temperatureC, e.humidityPct, e.pressureAtm]);
     const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -176,11 +186,11 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getCo2Class(val: number): string {
-    return val > 1200 ? 'danger' : val > 800 ? 'warning' : 'ok';
+    return val > 1000 ? 'danger' : val > 800 ? 'warning' : 'ok';
   }
 
   getPm25Class(val: number): string {
-    return val > 35 ? 'danger' : val > 12 ? 'warning' : 'ok';
+    return val > 25 ? 'danger' : val > 15 ? 'warning' : 'ok';
   }
 
   ngOnDestroy() {

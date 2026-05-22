@@ -30,7 +30,7 @@
             {{ device()!.status === 'online' ? 'Online' : 'Offline' }}
           </mat-chip>
           @if (device()!.windowMode === 'auto') {
-            <mat-chip class="chip-warning">Mod Automat</mat-chip>
+            <mat-chip class="chip-warning">Mod Automat Fereastră</mat-chip>
           }
         </div>
       </div>
@@ -49,28 +49,95 @@
     <section class="metrics-grid">
       <app-air-quality-card
         title="CO₂" icon="air" unit="ppm"
-        [value]="latestReading()?.co2 ?? null"
-        [previousValue]="previousReading()?.co2 ?? null"
-        [thresholds]="{ warningMin: 800, dangerMin: 1200 }"
+        [value]="latestReading()?.co2Ppm ?? null"
+        [previousValue]="previousReading()?.co2Ppm ?? null"
+        [thresholds]="{ warningMin: 800, dangerMin: 1000 }"
+        [isLoading]="!latestReading()" />
+      <app-air-quality-card
+        title="TVOC" icon="science" unit="ppb"
+        [value]="latestReading()?.tvocPpb ?? null"
+        [previousValue]="previousReading()?.tvocPpb ?? null"
+        [thresholds]="{ warningMin: 300, dangerMin: 500 }"
         [isLoading]="!latestReading()" />
       <app-air-quality-card
         title="PM2.5" icon="grain" unit="μg/m³"
-        [value]="latestReading()?.pm25 ?? null"
-        [previousValue]="previousReading()?.pm25 ?? null"
-        [thresholds]="{ warningMin: 12, dangerMin: 35 }"
+        [value]="latestReading()?.pm25Ugm3 ?? null"
+        [previousValue]="previousReading()?.pm25Ugm3 ?? null"
+        [thresholds]="{ warningMin: 15, dangerMin: 25 }"
         [isLoading]="!latestReading()" />
       <app-air-quality-card
         title="Temperatură" icon="thermostat" unit="°C"
-        [value]="latestReading()?.temperature ?? null"
-        [previousValue]="previousReading()?.temperature ?? null"
+        [value]="latestReading()?.temperatureC ?? null"
+        [previousValue]="previousReading()?.temperatureC ?? null"
         [thresholds]="{ warningMin: 26, dangerMin: 30 }"
         [isLoading]="!latestReading()" />
       <app-air-quality-card
         title="Umiditate" icon="water_drop" unit="%"
-        [value]="latestReading()?.humidity ?? null"
-        [previousValue]="previousReading()?.humidity ?? null"
+        [value]="latestReading()?.humidityPct ?? null"
+        [previousValue]="previousReading()?.humidityPct ?? null"
         [thresholds]="{ warningMin: 60, dangerMin: 70 }"
         [isLoading]="!latestReading()" />
+      <app-air-quality-card
+        title="Presiune" icon="speed" unit="atm"
+        [value]="latestReading()?.pressureAtm ?? null"
+        [previousValue]="previousReading()?.pressureAtm ?? null"
+        [thresholds]="{}"
+        [isLoading]="!latestReading()" />
+    </section>
+
+    <!-- Actuator Controls -->
+    <section class="actuators-row">
+      <!-- Fan Card -->
+      <mat-card class="actuator-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>toys</mat-icon>
+            Ventilator
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="actuator-state">
+            <span class="state-label" [class]="device()!.fanOn ? 'state-on' : 'state-off'">
+              {{ device()!.fanOn ? 'Pornit' : 'Oprit' }}
+            </span>
+            <mat-slide-toggle
+              color="primary"
+              [checked]="device()!.fanOn"
+              [disabled]="device()!.status === 'offline'"
+              (change)="toggleFan()">
+            </mat-slide-toggle>
+          </div>
+          @if (device()!.fanMode === 'auto') {
+            <p class="mode-hint"><mat-icon>autorenew</mat-icon> Mod automat activ</p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Humidifier Card -->
+      <mat-card class="actuator-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>water</mat-icon>
+            Umidificator
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="actuator-state">
+            <span class="state-label" [class]="device()!.humidifierOn ? 'state-on' : 'state-off'">
+              {{ device()!.humidifierOn ? 'Pornit' : 'Oprit' }}
+            </span>
+            <mat-slide-toggle
+              color="primary"
+              [checked]="device()!.humidifierOn"
+              [disabled]="device()!.status === 'offline'"
+              (change)="toggleHumidifier()">
+            </mat-slide-toggle>
+          </div>
+          @if (device()!.humidifierMode === 'auto') {
+            <p class="mode-hint"><mat-icon>autorenew</mat-icon> Mod automat activ</p>
+          }
+        </mat-card-content>
+      </mat-card>
     </section>
 
     <!-- History Chart -->
@@ -88,6 +155,24 @@
       </mat-card-content>
     </mat-card>
 
+    <!-- Predictions Chart -->
+    @if (predictions().length > 0) {
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>auto_graph</mat-icon>
+            Predicții AI
+            <span class="data-count">{{ predictions().length }} puncte</span>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper">
+            <canvas #predictionsCanvas></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
     <!-- Settings + Info -->
     <div class="bottom-row">
       <!-- Settings Card -->
@@ -95,7 +180,7 @@
         <mat-card-header>
           <mat-card-title>
             <mat-icon>tune</mat-icon>
-            Setări
+            Setări praguri
           </mat-card-title>
         </mat-card-header>
         <mat-card-content>
@@ -106,15 +191,56 @@
               <input matInput type="number" formControlName="co2Threshold">
             </mat-form-field>
             <mat-form-field appearance="outline">
+              <mat-label>Prag TVOC (ppb)</mat-label>
+              <mat-icon matPrefix>science</mat-icon>
+              <input matInput type="number" formControlName="tvocThreshold">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
               <mat-label>Prag PM2.5 (μg/m³)</mat-label>
               <mat-icon matPrefix>grain</mat-icon>
               <input matInput type="number" formControlName="pm25Threshold">
             </mat-form-field>
             <mat-form-field appearance="outline">
+              <mat-label>Temp. minimă (°C)</mat-label>
+              <mat-icon matPrefix>thermostat</mat-icon>
+              <input matInput type="number" formControlName="tempThresholdMin">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Temp. maximă (°C)</mat-label>
+              <mat-icon matPrefix>thermostat</mat-icon>
+              <input matInput type="number" formControlName="tempThresholdMax">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Umid. minimă (%)</mat-label>
+              <mat-icon matPrefix>water_drop</mat-icon>
+              <input matInput type="number" formControlName="humidityThresholdMin">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Umid. maximă (%)</mat-label>
+              <mat-icon matPrefix>water_drop</mat-icon>
+              <input matInput type="number" formControlName="humidityThresholdMax">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
               <mat-label>Mod fereastră</mat-label>
-              <mat-icon matPrefix>settings</mat-icon>
+              <mat-icon matPrefix>sensor_window</mat-icon>
               <mat-select formControlName="windowMode">
-                <mat-option value="auto">Automat (bazat pe praguri)</mat-option>
+                <mat-option value="auto">Automat</mat-option>
+                <mat-option value="manual">Manual</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Mod ventilator</mat-label>
+              <mat-icon matPrefix>toys</mat-icon>
+              <mat-select formControlName="fanMode">
+                <mat-option value="auto">Automat</mat-option>
+                <mat-option value="manual">Manual</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Mod umidificator</mat-label>
+              <mat-icon matPrefix>water</mat-icon>
+              <mat-select formControlName="humidifierMode">
+                <mat-option value="auto">Automat</mat-option>
                 <mat-option value="manual">Manual</mat-option>
               </mat-select>
             </mat-form-field>
@@ -160,6 +286,20 @@
               <span class="info-label">Stare fereastră</span>
               <span class="info-value" [class]="device()!.windowOpen ? 'status-ok' : ''">
                 {{ device()!.windowOpen ? 'Deschisă' : 'Închisă' }}
+              </span>
+            </div>
+            <mat-divider />
+            <div class="info-row">
+              <span class="info-label">Stare ventilator</span>
+              <span class="info-value" [class]="device()!.fanOn ? 'status-ok' : ''">
+                {{ device()!.fanOn ? 'Pornit' : 'Oprit' }}
+              </span>
+            </div>
+            <mat-divider />
+            <div class="info-row">
+              <span class="info-label">Stare umidificator</span>
+              <span class="info-value" [class]="device()!.humidifierOn ? 'status-ok' : ''">
+                {{ device()!.humidifierOn ? 'Pornit' : 'Oprit' }}
               </span>
             </div>
           </div>

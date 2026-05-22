@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.airguard.io',
-  wsUrl: 'wss://api.airguard.io',
+  apiUrl: 'https://bairguard-production.up.railway.app',
+  wsUrl: 'wss://bairguard-production.up.railway.app',
   useMockData: false
 };

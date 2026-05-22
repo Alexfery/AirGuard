@@ -1,4 +1,4 @@
-import { Component, signal, computed, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { SocketService } from '../../../core/services/socket.service';
 
 interface NavItem {
   label: string;
@@ -27,7 +28,7 @@ interface NavItem {
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss']
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit, OnDestroy {
   isMobile = signal(window.innerWidth < 768);
   sidenavOpen = signal(!this.isMobile());
 
@@ -37,7 +38,18 @@ export class ShellComponent {
     { label: 'Istoric', icon: 'history', route: '/history' },
   ];
 
-  constructor(public auth: AuthService) {}
+  constructor(
+    public auth: AuthService,
+    private socketService: SocketService,
+  ) {}
+
+  ngOnInit() {
+    this.socketService.connect();
+  }
+
+  ngOnDestroy() {
+    this.socketService.disconnect();
+  }
 
   @HostListener('window:resize', ['$event'])
   onResize() {

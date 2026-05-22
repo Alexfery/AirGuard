@@ -17,9 +17,9 @@
         <mat-form-field appearance="outline">
           <mat-label>Dispozitiv</mat-label>
           <mat-icon matPrefix>device_hub</mat-icon>
-          <mat-select formControlName="deviceId">
-            @for (d of deviceOptions; track d.id) {
-              <mat-option [value]="d.id">{{ d.name }}</mat-option>
+          <mat-select formControlName="deviceId" [disabled]="isLoadingDevices()">
+            @for (d of deviceOptions(); track d.value) {
+              <mat-option [value]="d.value">{{ d.label }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -110,24 +110,24 @@
               <td mat-cell *matCellDef="let r">{{ r.timestamp | date:'dd/MM/yy HH:mm' }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="co2">
+            <ng-container matColumnDef="co2Ppm">
               <th mat-header-cell *matHeaderCellDef>CO₂ (ppm)</th>
-              <td mat-cell *matCellDef="let r" [class]="'val-' + getCo2Class(r.co2)">{{ r.co2 }}</td>
+              <td mat-cell *matCellDef="let r" [class]="'val-' + getCo2Class(r.co2Ppm)">{{ r.co2Ppm }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="pm25">
+            <ng-container matColumnDef="pm25Ugm3">
               <th mat-header-cell *matHeaderCellDef>PM2.5 (μg/m³)</th>
-              <td mat-cell *matCellDef="let r" [class]="'val-' + getPm25Class(r.pm25)">{{ r.pm25 }}</td>
+              <td mat-cell *matCellDef="let r" [class]="'val-' + getPm25Class(r.pm25Ugm3)">{{ r.pm25Ugm3 }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="temperature">
+            <ng-container matColumnDef="temperatureC">
               <th mat-header-cell *matHeaderCellDef>Temp (°C)</th>
-              <td mat-cell *matCellDef="let r">{{ r.temperature }}</td>
+              <td mat-cell *matCellDef="let r">{{ r.temperatureC }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="humidity">
+            <ng-container matColumnDef="humidityPct">
               <th mat-header-cell *matHeaderCellDef>Umiditate (%)</th>
-              <td mat-cell *matCellDef="let r">{{ r.humidity }}</td>
+              <td mat-cell *matCellDef="let r">{{ r.humidityPct }}</td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

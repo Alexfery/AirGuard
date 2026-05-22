@@ -19,15 +19,15 @@ import { SocketService, SensorData } from '../../../core/services/socket.service
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Legend, Tooltip, Filler);
 
 interface ChartDataset {
-  key: 'co2' | 'pm25' | 'temperature';
+  key: 'co2Ppm' | 'pm25Ugm3' | 'temperatureC';
   label: string;
   color: string;
 }
 
 const DATASETS: ChartDataset[] = [
-  { key: 'co2', label: 'CO₂ (ppm)', color: '#26c6da' },
-  { key: 'pm25', label: 'PM2.5 (μg/m³)', color: '#ff9800' },
-  { key: 'temperature', label: 'Temperatură (°C)', color: '#4caf50' },
+  { key: 'co2Ppm', label: 'CO₂ (ppm)', color: '#26c6da' },
+  { key: 'pm25Ugm3', label: 'PM2.5 (μg/m³)', color: '#ff9800' },
+  { key: 'temperatureC', label: 'Temperatură (°C)', color: '#4caf50' },
 ];
 
 @Component({
@@ -40,7 +40,7 @@ const DATASETS: ChartDataset[] = [
 export class LiveChartComponent implements AfterViewInit, OnDestroy {
   @ViewChild('chartCanvas') chartCanvasRef!: ElementRef<HTMLCanvasElement>;
 
-  activeMetrics = signal<Set<string>>(new Set(['co2', 'pm25', 'temperature']));
+  activeMetrics = signal<Set<string>>(new Set(['co2Ppm', 'pm25Ugm3', 'temperatureC']));
   datasetDefs = DATASETS;
 
   private chart: Chart | null = null;
@@ -48,7 +48,7 @@ export class LiveChartComponent implements AfterViewInit, OnDestroy {
   private readonly MAX_POINTS = 20;
 
   private labels: string[] = [];
-  private dataBuffers: Record<string, number[]> = { co2: [], pm25: [], temperature: [] };
+  private dataBuffers: Record<string, number[]> = { co2Ppm: [], pm25Ugm3: [], temperatureC: [] };
 
   constructor(private socketService: SocketService) {}
 
@@ -114,9 +114,9 @@ export class LiveChartComponent implements AfterViewInit, OnDestroy {
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     });
     this.labels.push(time);
-    this.dataBuffers['co2'].push(data.co2);
-    this.dataBuffers['pm25'].push(data.pm25);
-    this.dataBuffers['temperature'].push(data.temperature);
+    this.dataBuffers['co2Ppm'].push(data.co2Ppm);
+    this.dataBuffers['pm25Ugm3'].push(data.pm25Ugm3);
+    this.dataBuffers['temperatureC'].push(data.temperatureC);
 
     if (this.labels.length > this.MAX_POINTS) {
       this.labels.shift();

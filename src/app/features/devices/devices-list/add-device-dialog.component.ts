@@ -22,6 +22,14 @@ import { MatSelectModule } from '@angular/material/select';
     <mat-dialog-content>
       <form [formGroup]="form" class="dialog-form">
         <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ID Dispozitiv (ex: airguard_01)</mat-label>
+          <mat-icon matPrefix>fingerprint</mat-icon>
+          <input matInput formControlName="id" placeholder="ex: airguard_01">
+          @if (form.get('id')?.hasError('required') && form.get('id')?.touched) {
+            <mat-error>ID-ul este obligatoriu (trebuie să coincidă cu ID-ul de pe ESP32)</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>Nume dispozitiv</mat-label>
           <mat-icon matPrefix>sensors</mat-icon>
           <input matInput formControlName="name" placeholder="ex: Senzor Bucătărie">
@@ -35,7 +43,7 @@ import { MatSelectModule } from '@angular/material/select';
           <input matInput formControlName="location" placeholder="ex: Bucătărie">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Mod inițial</mat-label>
+          <mat-label>Mod inițial fereastră</mat-label>
           <mat-select formControlName="windowMode">
             <mat-option value="auto">Automat</mat-option>
             <mat-option value="manual">Manual</mat-option>
@@ -63,6 +71,7 @@ import { MatSelectModule } from '@angular/material/select';
 })
 export class AddDeviceDialogComponent {
   form = this.fb.group({
+    id: ['', Validators.required],
     name: ['', Validators.required],
     location: [''],
     windowMode: ['auto'],
@@ -77,10 +86,19 @@ export class AddDeviceDialogComponent {
     if (this.form.valid) {
       this.dialogRef.close({
         ...this.form.value,
-        status: 'online',
+        status: 'offline',
         windowOpen: false,
+        fanOn: false,
+        fanMode: 'manual',
+        humidifierOn: false,
+        humidifierMode: 'manual',
         co2Threshold: 1000,
+        tvocThreshold: 500,
         pm25Threshold: 25,
+        tempThresholdMin: 16,
+        tempThresholdMax: 30,
+        humidityThresholdMin: 30,
+        humidityThresholdMax: 70,
       });
     }
   }

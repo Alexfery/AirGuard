@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { MockDataService, Device, HistoryEntry } from './mock-data.service';
+import { MockDataService, Device, HistoryEntry, Alert, Prediction } from './mock-data.service';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -26,7 +27,7 @@ export class ApiService {
     return this.http.patch<Device>(`${environment.apiUrl}/devices/${id}`, updates);
   }
 
-  addDevice(device: Omit<Device, 'id' | 'firmware' | 'lastSync'>): Observable<Device> {
+  addDevice(device: Omit<Device, 'firmware' | 'lastSync'>): Observable<Device> {
     if (environment.useMockData) return this.mock.addDevice(device);
     return this.http.post<Device>(`${environment.apiUrl}/devices`, device);
   }
@@ -34,7 +35,40 @@ export class ApiService {
   getHistory(deviceId: string, from: Date, to: Date): Observable<HistoryEntry[]> {
     if (environment.useMockData) return this.mock.getHistory(deviceId, from, to);
     return this.http.get<HistoryEntry[]>(
-      `${environment.apiUrl}/history/${deviceId}?from=${from.toISOString()}&to=${to.toISOString()}`
+      `${environment.apiUrl}/sensors/${deviceId}/history`,
+      { params: { from: from.toISOString(), to: to.toISOString() } },
     );
+  }
+
+  getAlerts(deviceId: string, limit = 20): Observable<Alert[]> {
+    if (environment.useMockData) {
+      return this.mock.getDevice(deviceId).pipe(
+        map(device => (device ? this.mock.generateAlerts([device]).slice(0, limit) : [])),
+      );
+    }
+    return this.http.get<Alert[]>(`${environment.apiUrl}/alerts/${deviceId}`, {
+      params: { limit: String(limit) },
+    });
+  }
+
+  getPredictions(deviceId: string, limit = 20): Observable<Prediction[]> {
+    if (environment.useMockData) return of([]);
+    return this.http.get<Prediction[]>(`${environment.apiUrl}/sensors/${deviceId}/predictions`, {
+      params: { limit: String(limit) },
+    });
+  }
+
+  setFan(deviceId: string, on: boolean): Observable<void> {
+    if (environment.useMockData) {
+      return this.mock.updateDevice(deviceId, { fanOn: on }).pipe(map(() => void 0));
+    }
+    return this.http.patch<void>(`${environment.apiUrl}/devices/${deviceId}/fan`, { on });
+  }
+
+  setHumidifier(deviceId: string, on: boolean): Observable<void> {
+    if (environment.useMockData) {
+      return this.mock.updateDevice(deviceId, { humidifierOn: on }).pipe(map(() => void 0));
+    }
+    return this.http.patch<void>(`${environment.apiUrl}/devices/${deviceId}/humidifier`, { on });
   }
 }

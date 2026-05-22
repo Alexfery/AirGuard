@@ -76,15 +76,15 @@
               @if (latestReadings()[device.id]; as r) {
                 <div class="sensor-row">
                   <span><mat-icon>air</mat-icon> CO₂</span>
-                  <strong [class]="r.co2 > 1200 ? 'status-danger' : r.co2 > 800 ? 'status-warning' : 'status-ok'">{{ r.co2 }} ppm</strong>
+                  <strong [class]="r.co2Ppm > 1000 ? 'status-danger' : r.co2Ppm > 800 ? 'status-warning' : 'status-ok'">{{ r.co2Ppm }} ppm</strong>
                 </div>
                 <div class="sensor-row">
                   <span><mat-icon>grain</mat-icon> PM2.5</span>
-                  <strong [class]="r.pm25 > 35 ? 'status-danger' : r.pm25 > 12 ? 'status-warning' : 'status-ok'">{{ r.pm25 }} μg/m³</strong>
+                  <strong [class]="r.pm25Ugm3 > 25 ? 'status-danger' : r.pm25Ugm3 > 15 ? 'status-warning' : 'status-ok'">{{ r.pm25Ugm3 }} μg/m³</strong>
                 </div>
                 <div class="sensor-row">
                   <span><mat-icon>thermostat</mat-icon> Temp</span>
-                  <strong>{{ r.temperature }}°C</strong>
+                  <strong>{{ r.temperatureC }}°C</strong>
                 </div>
               } @else {
                 <div class="no-data">

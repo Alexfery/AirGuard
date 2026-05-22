@@ -9,11 +9,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 
 import { SocketService, SensorData } from '../../core/services/socket.service';
 import { ApiService } from '../../core/services/api.service';
-import { MockDataService, Device, Alert } from '../../core/services/mock-data.service';
+import { Device, Alert } from '../../core/services/mock-data.service';
 import { AirQualityCardComponent, MetricThresholds } from './air-quality-card/air-quality-card.component';
 import { LiveChartComponent } from './live-chart/live-chart.component';
 import { AlertsPanelComponent } from './alerts-panel/alerts-panel.component';
@@ -22,7 +22,7 @@ interface MetricCard {
   title: string;
   icon: string;
   unit: string;
-  key: keyof Pick<SensorData, 'co2' | 'pm25' | 'temperature' | 'humidity'>;
+  key: keyof Pick<SensorData, 'co2Ppm' | 'tvocPpb' | 'pm25Ugm3' | 'temperatureC' | 'humidityPct' | 'pressureAtm'>;
   thresholds: MetricThresholds;
 }
 
@@ -31,29 +31,43 @@ const METRIC_CARDS: MetricCard[] = [
     title: 'CO₂',
     icon: 'air',
     unit: 'ppm',
-    key: 'co2',
-    thresholds: { warningMin: 800, dangerMin: 1200 },
+    key: 'co2Ppm',
+    thresholds: { warningMin: 800, dangerMin: 1000 },
+  },
+  {
+    title: 'TVOC',
+    icon: 'science',
+    unit: 'ppb',
+    key: 'tvocPpb',
+    thresholds: { warningMin: 300, dangerMin: 500 },
   },
   {
     title: 'PM2.5',
     icon: 'grain',
     unit: 'μg/m³',
-    key: 'pm25',
-    thresholds: { warningMin: 12, dangerMin: 35 },
+    key: 'pm25Ugm3',
+    thresholds: { warningMin: 15, dangerMin: 25 },
   },
   {
     title: 'Temperatură',
     icon: 'thermostat',
     unit: '°C',
-    key: 'temperature',
+    key: 'temperatureC',
     thresholds: { warningMin: 26, dangerMin: 30 },
   },
   {
     title: 'Umiditate',
     icon: 'water_drop',
     unit: '%',
-    key: 'humidity',
+    key: 'humidityPct',
     thresholds: { warningMin: 60, dangerMin: 70 },
+  },
+  {
+    title: 'Presiune',
+    icon: 'speed',
+    unit: 'atm',
+    key: 'pressureAtm',
+    thresholds: {},
   },
 ];
 
@@ -101,7 +115,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private socketService: SocketService,
     private apiService: ApiService,
-    private mockDataService: MockDataService,
     private snackBar: MatSnackBar,
   ) {}
 
@@ -132,11 +145,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateAlerts() {
-    const devicesWithReadings = this.devices().map(d => {
-      const r = this.latestReadings()[d.id];
-      return r ? { ...d, ...r } : d;
+    const devices = this.devices();
+    if (!devices.length) return;
+
+    forkJoin(devices.map(d => this.apiService.getAlerts(d.id))).subscribe({
+      next: (results) => {
+        const all = results.flat().sort((a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+        );
+        this.alerts.set(all.slice(0, 20));
+      },
+      error: () => {},
     });
-    this.alerts.set(this.mockDataService.generateAlerts(devicesWithReadings));
   }
 
   getLatestValue(key: keyof SensorData): number | null {

@@ -36,7 +36,7 @@ import { AddDeviceDialogComponent } from './add-device-dialog.component';
 export class DevicesListComponent implements OnInit {
   isLoading = signal(true);
   devices = signal<Device[]>([]);
-  displayedColumns = ['name', 'location', 'status', 'co2', 'pm25', 'temperature', 'humidity', 'window', 'actions'];
+  displayedColumns = ['name', 'location', 'status', 'co2Ppm', 'pm25Ugm3', 'temperatureC', 'humidityPct', 'window', 'actions'];
 
   constructor(
     private apiService: ApiService,
@@ -89,11 +89,11 @@ export class DevicesListComponent implements OnInit {
 
   getCo2Class(val?: number): string {
     if (!val) return '';
-    return val > 1200 ? 'status-danger' : val > 800 ? 'status-warning' : 'status-ok';
+    return val > 1000 ? 'status-danger' : val > 800 ? 'status-warning' : 'status-ok';
   }
 
   getPm25Class(val?: number): string {
     if (!val) return '';
-    return val > 35 ? 'status-danger' : val > 12 ? 'status-warning' : 'status-ok';
+    return val > 25 ? 'status-danger' : val > 15 ? 'status-warning' : 'status-ok';
   }
 }

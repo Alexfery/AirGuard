@@ -1,17 +1,18 @@
 import {
   AuthService
-} from "./chunk-CKKSJOVC.js";
+} from "./chunk-NO2UJ33T.js";
 import {
   MatListItem,
   MatListItemIcon,
   MatListItemTitle,
   MatListModule,
   MatNavList
-} from "./chunk-J7FLSUAP.js";
+} from "./chunk-6LXI6MP2.js";
 import {
   MatDivider,
-  MatDividerModule
-} from "./chunk-H7P4TWSV.js";
+  MatDividerModule,
+  SocketService
+} from "./chunk-JM5HXMXC.js";
 import {
   Router,
   RouterLink,
@@ -19,11 +20,11 @@ import {
   RouterOutlet,
   provideRouter,
   withViewTransitions
-} from "./chunk-FX7RJNGN.js";
+} from "./chunk-O4DNW7G5.js";
 import {
   MatTooltip,
   MatTooltipModule
-} from "./chunk-ZPASEQEY.js";
+} from "./chunk-IWIRSLAF.js";
 import {
   CdkScrollable,
   CdkScrollableModule,
@@ -34,7 +35,7 @@ import {
   ScrollDispatcher,
   TemplatePortal,
   ViewportRuler
-} from "./chunk-UETAL3Z3.js";
+} from "./chunk-B5F2KBDB.js";
 import {
   A11yModule,
   ANIMATION_MODULE_TYPE,
@@ -108,6 +109,7 @@ import {
   asapScheduler,
   booleanAttribute,
   bootstrapApplication,
+  catchError,
   coerceBooleanProperty,
   coerceNumberProperty,
   createComponent,
@@ -138,6 +140,7 @@ import {
   switchMap,
   take,
   takeUntil,
+  throwError,
   transition,
   trigger,
   withInterceptors,
@@ -187,7 +190,7 @@ import {
   ɵɵtextInterpolate,
   ɵɵtextInterpolate1,
   ɵɵviewQuery
-} from "./chunk-CUZ7VDK2.js";
+} from "./chunk-IMUIUAEW.js";
 
 // node_modules/@angular/animations/fesm2022/browser.mjs
 var LINE_START = "\n - ";
@@ -7736,8 +7739,9 @@ function ShellComponent_Conditional_16_Template(rf, ctx) {
   }
 }
 var ShellComponent = class _ShellComponent {
-  constructor(auth) {
+  constructor(auth, socketService) {
     this.auth = auth;
+    this.socketService = socketService;
     this.isMobile = signal(window.innerWidth < 768);
     this.sidenavOpen = signal(!this.isMobile());
     this.navItems = [
@@ -7745,6 +7749,12 @@ var ShellComponent = class _ShellComponent {
       { label: "Dispozitive", icon: "device_hub", route: "/devices" },
       { label: "Istoric", icon: "history", route: "/history" }
     ];
+  }
+  ngOnInit() {
+    this.socketService.connect();
+  }
+  ngOnDestroy() {
+    this.socketService.disconnect();
   }
   onResize() {
     const mobile = window.innerWidth < 768;
@@ -7757,7 +7767,7 @@ var ShellComponent = class _ShellComponent {
   }
   static {
     this.\u0275fac = function ShellComponent_Factory(t) {
-      return new (t || _ShellComponent)(\u0275\u0275directiveInject(AuthService));
+      return new (t || _ShellComponent)(\u0275\u0275directiveInject(AuthService), \u0275\u0275directiveInject(SocketService));
     };
   }
   static {
@@ -7844,7 +7854,7 @@ var ShellComponent = class _ShellComponent {
   }
 };
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(ShellComponent, { className: "ShellComponent", filePath: "src/app/shared/components/shell/shell.component.ts", lineNumber: 30 });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(ShellComponent, { className: "ShellComponent", filePath: "src/app/shared/components/shell/shell.component.ts", lineNumber: 31 });
 })();
 
 // src/app/app.routes.ts
@@ -7852,11 +7862,11 @@ var routes = [
   { path: "", redirectTo: "dashboard", pathMatch: "full" },
   {
     path: "login",
-    loadComponent: () => import("./chunk-RYJGNLRR.js").then((m) => m.LoginComponent)
+    loadComponent: () => import("./chunk-CZ6CDLK7.js").then((m) => m.LoginComponent)
   },
   {
     path: "register",
-    loadComponent: () => import("./chunk-BOC7JTM5.js").then((m) => m.RegisterComponent)
+    loadComponent: () => import("./chunk-CCVETLEY.js").then((m) => m.RegisterComponent)
   },
   {
     path: "",
@@ -7865,19 +7875,19 @@ var routes = [
     children: [
       {
         path: "dashboard",
-        loadComponent: () => import("./chunk-QL7RQ45H.js").then((m) => m.DashboardComponent)
+        loadComponent: () => import("./chunk-NHV56G4K.js").then((m) => m.DashboardComponent)
       },
       {
         path: "devices",
-        loadComponent: () => import("./chunk-TO3NAGMN.js").then((m) => m.DevicesListComponent)
+        loadComponent: () => import("./chunk-2WTZUHQF.js").then((m) => m.DevicesListComponent)
       },
       {
         path: "devices/:id",
-        loadComponent: () => import("./chunk-FIUEK2VO.js").then((m) => m.DeviceDetailComponent)
+        loadComponent: () => import("./chunk-SR3HKI4O.js").then((m) => m.DeviceDetailComponent)
       },
       {
         path: "history",
-        loadComponent: () => import("./chunk-7VXW3C42.js").then((m) => m.HistoryComponent)
+        loadComponent: () => import("./chunk-S3HS5R5A.js").then((m) => m.HistoryComponent)
       }
     ]
   },
@@ -7893,12 +7903,24 @@ var jwtInterceptor = (req, next) => {
   return next(req);
 };
 
+// src/app/core/interceptors/error.interceptor.ts
+var errorInterceptor = (req, next) => {
+  const router = inject(Router);
+  return next(req).pipe(catchError((err) => {
+    if (err.status === 401) {
+      localStorage.removeItem("airguard_user");
+      router.navigate(["/login"]);
+    }
+    return throwError(() => err);
+  }));
+};
+
 // src/app/app.config.ts
 var appConfig = {
   providers: [
     provideRouter(routes, withViewTransitions()),
     provideAnimations(),
-    provideHttpClient(withInterceptors([jwtInterceptor])),
+    provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor])),
     provideNativeDateAdapter()
   ]
 };

@@ -1,5 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface User {
@@ -15,7 +17,10 @@ export class AuthService {
   currentUser = this.userSignal.asReadonly();
   isAuthenticated = computed(() => !!this.userSignal());
 
-  constructor(private router: Router) {
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {
     this.restoreSession();
   }
 
@@ -30,42 +35,36 @@ export class AuthService {
     }
   }
 
-  login(email: string, _password: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (environment.useMockData) {
-          const user: User = {
-            id: 'user-1',
-            name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-            email,
-            token: 'mock-jwt-' + btoa(email) + '-' + Date.now()
-          };
-          this.saveUser(user);
-          resolve();
-        } else {
-          reject(new Error('Backend indisponibil'));
-        }
-      }, 900);
+  login(email: string, password: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<User>(`${environment.apiUrl}/auth/login`, { email, password }),
+    ).then(user => {
+      this.saveUser(user);
     });
+
+    // MOCK: setTimeout fallback (useMockData: true)
+    // return new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     const user: User = { id: 'user-1', name: email.split('@')[0], email, token: 'mock-jwt-' + Date.now() };
+    //     this.saveUser(user); resolve();
+    //   }, 900);
+    // });
   }
 
-  register(name: string, email: string, _password: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (environment.useMockData) {
-          const user: User = {
-            id: 'user-' + Date.now(),
-            name,
-            email,
-            token: 'mock-jwt-' + btoa(email) + '-' + Date.now()
-          };
-          this.saveUser(user);
-          resolve();
-        } else {
-          reject(new Error('Backend indisponibil'));
-        }
-      }, 900);
+  register(name: string, email: string, password: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<User>(`${environment.apiUrl}/auth/register`, { name, email, password }),
+    ).then(user => {
+      this.saveUser(user);
     });
+
+    // MOCK: setTimeout fallback (useMockData: true)
+    // return new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     const user: User = { id: 'user-' + Date.now(), name, email, token: 'mock-jwt-' + Date.now() };
+    //     this.saveUser(user); resolve();
+    //   }, 900);
+    // });
   }
 
   logout() {
